@@ -1,8 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
-const { getMatchedUsers } = require('../controllers/userController');
-const { addActivities, getUserActivities } = require('../controllers/userController');
+const { getUserProfile,
+        getMatchedUsers, 
+        addActivities, 
+        getUserActivities } = require('../controllers/userController');
+
+// Get User Profile - Protected Route
+router.get('/profile', auth, getUserProfile);
 
 // Route to add or update activities - protected route
 router.post('/activities', auth, addActivities);

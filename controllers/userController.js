@@ -1,5 +1,20 @@
 const User = require('../models/User');
 
+// Get User Profile
+exports.getUserProfile = async (req, res) => {
+  try {
+    // req.user should contain the user ID if the auth middleware worked correctly
+    const user = await User.findById(req.user).select('-password'); // Exclude password field from result
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+    res.json(user);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+};
+
 // Add or Update User Activities
 exports.addActivities = async (req, res) => {
   const { activities } = req.body;
@@ -40,23 +55,22 @@ exports.getUserActivities = async (req, res) => {
 
 // Get Matched Users Based on Activities
 exports.getMatchedUsers = async (req, res) => {
-    try {
-      // Find the logged-in user's activities
-      const user = await User.findById(req.user);
-      if (!user || user.activities.length === 0) {
-        return res.status(400).json({ msg: 'Please add some activities first.' });
-      }
-  
-      // Find users who have at least one matching activity
-      const matchedUsers = await User.find({
-        _id: { $ne: req.user }, // Exclude the current user
-        activities: { $in: user.activities },
-      }).select('username activities');
-  
-      res.json(matchedUsers);
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send('Server error');
+  try {
+    // Find the logged-in user's activities
+    const user = await User.findById(req.user);
+    if (!user || user.activities.length === 0) {
+      return res.status(400).json({ msg: 'Please add some activities first.' });
     }
-  };
-  
+
+    // Find users who have at least one matching activity
+    const matchedUsers = await User.find({
+      _id: { $ne: req.user }, // Exclude the current user
+      activities: { $in: user.activities },
+    }).select('username activities');
+
+    res.json(matchedUsers);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+};
